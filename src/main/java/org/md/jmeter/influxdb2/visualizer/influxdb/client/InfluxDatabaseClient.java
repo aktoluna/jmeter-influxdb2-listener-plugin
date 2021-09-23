@@ -3,7 +3,9 @@ package org.md.jmeter.influxdb2.visualizer.influxdb.client;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
+import com.influxdb.client.WriteApiBlocking;
 import com.influxdb.client.write.Point;
+import com.influxdb.exceptions.InfluxException;
 import org.md.jmeter.influxdb2.visualizer.config.InfluxDBConfig;
 import org.apache.jmeter.visualizers.backend.BackendListenerContext;
 import org.slf4j.Logger;
@@ -61,9 +63,18 @@ public class InfluxDatabaseClient {
     public void write(Point point) {
 
         // Write by Data Point
-       try (WriteApi writeApi = this.influxDB.makeWriteApi()) {
+      /* try (WriteApi writeApi = this.influxDB.makeWriteApi()) {
 
             writeApi.writePoint(point);
+        }*/
+
+        WriteApiBlocking writeApi = this.influxDB.getWriteApiBlocking();
+
+        try {
+            writeApi.writePoint(point);
+        }
+        catch (InfluxException ie){
+            LOGGER.error("Failed to write data ", ie);
         }
     }
 
